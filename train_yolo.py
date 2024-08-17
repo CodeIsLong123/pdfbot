@@ -1,56 +1,42 @@
 from ultralytics import YOLO
 import os
 ### Train the YOLO model on the annotated images
-
-yolo = YOLO()
-
-
-
-
-
-
-def combine_data_paths(image_path, txt_path):   
+def combine_data_paths(image_path, txt_path):
+    image_files = os.listdir(image_path)
+    txt_files = os.listdir(txt_path)
     
-    images = [f for f in os.listdir(image_path) if f.endswith(".png")]
-    txts = [f for f in os.listdir(txt_path) if f.endswith(".txt")]
-    
-    images = [f.strip(".png") for f in images]
-    txts = [f.strip(".txt") for f in txts]
-    
-    common = list(set(images).intersection(txts))
-    
-    return common
+    combined_data = []
+    for image_file in image_files:
+        for txt_file in txt_files:
+            if image_file.split(".")[0] == txt_file.split(".")[0]:
+                combined_data.append((f"{image_path}/{image_file}", f"{txt_path}/{txt_file}"))
+    return combined_data
 
+
+def test_yolo( model_path = "pdf_reader2/weights/best.pt", source="images/test"):
     
+    
+    if os.path.exists(model_path):
+        print("Model exists")
+    
+    
+    for img in os.listdir(source):
+        yolo_model = YOLO(model_path)
+        results = yolo_model(
+            source=f"{source}/{img}",
+            conf = 0.5,
+            show = True
             
-
-def create_dataset(img_path, txt_path, train_size = 0.7, test_size= 0.15):
-    common = combine_data_paths(img_path, txt_path)
-    
-    train_size = int(len(common) * train_size)
-    test_size = int(len(common) * test_size)
-    
-    print(train_size, test_size)
-    
-    
-    train = common[:train_size]
-    test = common[train_size:train_size+test_size]
-    val = common[train_size+test_size:]
-    
-    return train, test, val
+        )
 
 
+        
+def train():
+    # Initialize the YOLOv8 model (use the model name or model file)
+    yolo_model = YOLO("yolov8n.yaml")  # or "yolov8s.pt" depending on the model you want
 
-def train_yolo():
-    pass    
+    # Train the model with a custom output model name
+    yolo_model.train(data="config/config.yaml", epochs=100, name="pdf_reader")
 
-
-if __name__ == "__main__":
-    IMAGE_DATA_PATH = "images/train"
-    TXT_DATA_PATH = "ya/obj_train_data"
-    
-    train = create_dataset(IMAGE_DATA_PATH, TXT_DATA_PATH)
-    
-    
-    
-   
+if __name__ == "__main__":  
+    test_yolo()

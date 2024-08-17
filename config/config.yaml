@@ -1,0 +1,12 @@
+path: /Users/janjohannsen/Desktop/chatbot_application/pdfbot/
+train: images/train
+val: images/train
+
+names:
+  0: main_text
+  1: additiona_info
+  2: images
+  3: tables
+  4: header
+  5: references
+
